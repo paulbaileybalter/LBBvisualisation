@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Brew Board — Live Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=9">
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <button class="brand-mark" id="exportGmailBtn" type="button" title="Copy email report to clipboard" aria-label="Copy email report to clipboard">
+        <svg id="exportIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+      </button>
+      <div>
+        <p class="eyebrow">Live Brewery Board</p>
+        <h1>Weekly Production Dashboard</h1>
+      </div>
+    </div>
+    <div class="header-logo">
+      <img src="logo.svg" alt="Company logo" class="site-logo">
+    </div>
+    <div class="week-picker">
+      <label for="weekSelect">Week</label>
+      <select id="weekSelect"></select>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Signature element: the week strip, echoing the physical board's Mon–Sun layout -->
+  <section class="week-strip-section">
+    <div class="section-head">
+      <h2>This week on the board</h2>
+      <p id="weekRange" class="muted"></p>
+    </div>
+    <div class="gauge-legend">
+      <span><span class="chip chip-gauge-brew"></span>Brew</span>
+      <span><span class="chip chip-gauge-transfer"></span>Transfer</span>
+      <span><span class="chip chip-gauge-canning"></span>Canning</span>
+      <span><span class="chip chip-gauge-kegging"></span>Kegging</span>
+    </div>
+    <div id="weekStrip" class="week-strip" role="list"></div>
+  </section>
+
+  <section class="stats-section">
+    <div id="statGrid" class="stat-grid"></div>
+  </section>
+
+  <section class="charts-section">
+    <div class="section-head">
+      <h2>Volume by SKU This Week</h2>
+      <p class="muted">Hectolitres produced this week, split by product.</p>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="chip chip-krones"></span>Brewing</h3>
+        <div class="chart-wrap"><canvas id="chartBrewing"></canvas></div>
+        <p class="chart-empty" id="emptyBrewing">No brews logged this week.</p>
+        <div class="chart-sku-list" id="skuListBrewing"></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="chip chip-transfer"></span>Cellar Transfers</h3>
+        <div class="chart-wrap"><canvas id="chartTransfer"></canvas></div>
+        <p class="chart-empty" id="emptyTransfer">No transfers logged this week.</p>
+        <div class="chart-sku-list" id="skuListTransfer"></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="chip chip-canned"></span>Canning</h3>
+        <div class="chart-wrap"><canvas id="chartCanned"></canvas></div>
+        <p class="chart-empty" id="emptyCanned">No canning logged this week.</p>
+        <div class="chart-sku-list" id="skuListCanned"></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="chip chip-kegged"></span>Kegging</h3>
+        <div class="chart-wrap"><canvas id="chartKegged"></canvas></div>
+        <p class="chart-empty" id="emptyKegged">No kegging logged this week.</p>
+        <div class="chart-sku-list" id="skuListKegged"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="app.js?v=9"></script>
+</body>
+</html>

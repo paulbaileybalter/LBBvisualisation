@@ -1,0 +1,493 @@
+:root {
+  --bg-void: #FFFFFF;
+  --bg-panel: #FFFFFF;
+  --bg-panel-raised: #F6F5F1;
+  --steel-line: #DEDAD1;
+  --steel-line-soft: #ECE9E2;
+  --text-primary: #1F2124;
+  --text-muted: #6B6E6B;
+  --text-faint: #9A9C98;
+
+  --amber: #E0A93B;       /* Krones brewhouse (fills/borders — see amber-ink for text) */
+  --amber-ink: #A97A1C;   /* darker amber for text/icons, readable on white */
+  --copper: #C1652F;      /* DME brewhouse */
+  --hop: #7C9A5E;         /* transfers / cellar */
+  --steel-blue: #5C87A6;  /* canned */
+  --plum: #9C7A9E;        /* kegged */
+  --flag-red: #C1502E;
+
+  --radius-s: 3px;
+  --radius-m: 6px;
+
+  --font-display: 'Lexend', sans-serif;
+  --font-body: 'Lexend', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* hard guarantee: this dashboard never scrolls */
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.4;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(224,169,59,0.05), transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(92,135,166,0.05), transparent 40%);
+}
+
+.grain {
+  display: none; /* the grain texture read as speckling on a white background — disabled for the light theme */
+}
+
+a { color: inherit; }
+
+h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: 0.01em; }
+
+.muted { color: var(--text-muted); }
+
+/* ---------- Header ---------- */
+
+.site-header {
+  border-bottom: 1px solid var(--steel-line);
+  flex: 0 0 auto;
+}
+
+.header-inner {
+  max-width: 1900px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 20px;
+}
+
+.header-logo { justify-self: center; }
+
+.site-logo {
+  width: 38px;
+  height: 38px;
+  display: block;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.brand-mark {
+  color: var(--amber-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-m);
+  background: var(--bg-panel);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.brand-mark:hover { background: var(--bg-panel-raised); border-color: var(--amber); }
+.brand-mark:disabled { opacity: 0.6; cursor: wait; }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber-ink);
+  margin: 0 0 3px 0;
+}
+
+.site-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.week-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: end;
+}
+
+.week-picker label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+#weekSelect {
+  background: var(--bg-panel);
+  border: 1px solid var(--steel-line);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 7px 12px;
+  border-radius: var(--radius-s);
+}
+
+#weekSelect { min-width: 240px; }
+
+#weekSelect:focus-visible, select:focus-visible, button:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* ---------- Layout ---------- */
+/* This dashboard is designed to fill a 1920×1080 monitor/TV with no
+   scrolling, with some safety margin for slightly smaller screens. main
+   fills whatever vertical space is left after the header, and distributes
+   it across the three sections below by flex-grow weight. Every level
+   (html/body, main, each section, day-card, chart-card) has its own
+   overflow:hidden, so even an unusually data-heavy week clips quietly
+   inside its own box rather than pushing the page taller. */
+
+main {
+  max-width: 1900px;
+  margin: 0 auto;
+  padding: 16px 28px 12px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
+section {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.week-strip-section { flex: 1.3 1 auto; }
+.stats-section { flex: 0 0 auto; }
+.charts-section { flex: 1 1 auto; min-height: 0; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--steel-line-soft);
+  padding-bottom: 8px;
+  flex: 0 0 auto;
+}
+
+.section-head h2 {
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.section-head p { font-size: 12px; margin: 0; }
+
+/* ---------- Week strip (signature element) ---------- */
+
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.day-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-m);
+  box-shadow: 0 1px 2px rgba(31,33,36,0.05);
+  padding: 10px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  min-height: 130px;
+  overflow: hidden;
+}
+
+.day-card.is-today { border-color: var(--amber); box-shadow: 0 0 0 1px rgba(224,169,59,0.35) inset; }
+
+.day-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.day-date {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: -4px;
+  flex: none;
+}
+
+.gauge-legend {
+  display: flex;
+  gap: 16px;
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: 0 0 auto;
+}
+
+.gauge-legend span { display: inline-flex; align-items: center; gap: 5px; }
+
+.day-gauge {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+}
+
+.gauge-bar {
+  position: relative;
+  width: 26px;
+  height: 100%;
+  border: 1px solid var(--steel-line);
+  border-radius: 3px;
+  background: var(--bg-panel-raised);
+  overflow: hidden;
+}
+
+.gauge-bar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  transition: height 0.4s ease;
+}
+
+.gauge-bar-brew .gauge-bar-fill { background: var(--amber); }
+.gauge-bar-transfer .gauge-bar-fill { background: var(--hop); }
+.gauge-bar-canning .gauge-bar-fill { background: var(--steel-blue); }
+.gauge-bar-kegging .gauge-bar-fill { background: var(--plum); }
+
+.gauge-bar-label {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  pointer-events: none;
+  max-height: calc(100% - 8px);
+  overflow: hidden;
+  line-height: 1;
+}
+
+.chip-gauge-brew { background: var(--amber); }
+.chip-gauge-transfer { background: var(--hop); }
+.chip-gauge-canning { background: var(--steel-blue); }
+.chip-gauge-kegging { background: var(--plum); }
+
+.day-total {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex: none;
+}
+
+.day-flag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  color: var(--flag-red);
+}
+
+.day-grain-flag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 16px;
+  height: 16px;
+  color: var(--amber-ink);
+}
+
+/* ---------- Stat grid ---------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px;
+  background: var(--steel-line);
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.stat-cell {
+  background: var(--bg-panel);
+  padding: 14px 16px 12px;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-value small { font-size: 14px; color: var(--text-muted); font-weight: 500; margin-left: 4px; }
+
+/* ---------- Charts ---------- */
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.chart-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-m);
+  box-shadow: 0 1px 2px rgba(31,33,36,0.05);
+  padding: 12px 12px 12px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card h3 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+  overflow-wrap: anywhere;
+  flex: 0 0 auto;
+}
+
+.chip { width: 9px; height: 9px; border-radius: 2px; display: inline-block; flex: none; }
+.chip-krones { background: var(--amber); }
+.chip-transfer { background: var(--hop); }
+.chip-canned { background: var(--steel-blue); }
+.chip-kegged { background: var(--plum); }
+
+.chart-sku-list {
+  columns: 2;
+  column-gap: 14px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--steel-line-soft);
+  min-width: 0;
+  max-height: 100px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.chart-sku-list .chart-sku-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-primary);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  break-inside: avoid;
+  margin-bottom: 4px;
+}
+
+.chart-sku-list .sku-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 190px;
+  overflow: hidden;
+}
+
+.chart-empty {
+  display: none;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 12px;
+  padding-top: 40px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1080px) {
+  .chart-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 880px) {
+  .chart-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .week-strip { grid-template-columns: repeat(4, 1fr); }
+  .chart-grid { grid-template-columns: 1fr; }
+  .header-inner { grid-template-columns: 1fr; justify-items: center; text-align: center; row-gap: 12px; }
+  .brand { flex-direction: column; }
+  .week-picker { justify-self: center; }
+  #weekSelect { min-width: 0; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .gauge-bar-fill { transition: none; }
+}
